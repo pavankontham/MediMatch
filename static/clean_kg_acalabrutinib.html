@@ -1,0 +1,155 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 500px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "orange", "id": "ACALABRUTINIB", "label": "ACALABRUTINIB", "shape": "dot", "size": 30}, {"color": "#97c2fc", "id": "2.56", "label": "2.56", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "118.51", "label": "118.51", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "3.1", "label": "3.1", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "8.508638306165727", "label": "8.508638306165727", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "triple bond", "label": "triple bond", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "0.45", "label": "0.45", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "4.0", "label": "4.0", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Tyrosine-protein kinase BTK", "label": "Tyrosine-protein kinase BTK", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Homo sapiens", "label": "Homo sapiens", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "SINGLE PROTEIN", "label": "SINGLE PROTEIN", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Tyrosine-protein kinase BTK inhibitor", "label": "Tyrosine-protein kinase BTK inhibitor", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "chronic graft versus host disease", "label": "chronic graft versus host disease", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Bronchiolitis Obliterans Syndrome", "label": "Bronchiolitis Obliterans Syndrome", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "activated_acetylene", "label": "activated_acetylene", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "alkynyl michael acceptor1", "label": "alkynyl michael acceptor1", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "rheumatoid arthritis", "label": "rheumatoid arthritis", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Arthritis, Rheumatoid", "label": "Arthritis, Rheumatoid", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "non-small cell lung carcinoma", "label": "non-small cell lung carcinoma", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Carcinoma, Non-Small-Cell Lung", "label": "Carcinoma, Non-Small-Cell Lung", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "head and neck squamous cell carcinoma", "label": "head and neck squamous cell carcinoma", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Carcinoma, Squamous Cell", "label": "Carcinoma, Squamous Cell", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "infectious disease", "label": "infectious disease", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Communicable Diseases", "label": "Communicable Diseases", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "food allergy", "label": "food allergy", "shape": "dot", "size": 10}]);
+                  edges = new vis.DataSet([{"arrows": "to", "from": "ACALABRUTINIB", "label": "logD_value", "title": "logD_value", "to": "2.56", "width": 1}, {"arrows": "to", "from": "ACALABRUTINIB", "label": "psa_value", "title": "psa_value", "to": "118.51", "width": 1}, {"arrows": "to", "from": "ACALABRUTINIB", "label": "binding_affinity_IC50", "title": "binding_affinity_IC50", "to": "3.1", "width": 1}, {"arrows": "to", "from": "ACALABRUTINIB", "label": "binding_affinity_pIC50", "title": "binding_affinity_pIC50", "to": "8.508638306165727", "width": 1}, {"arrows": "to", "from": "ACALABRUTINIB", "label": "has_toxicity", "title": "has_toxicity", "to": "triple bond", "width": 1}, {"arrows": "to", "from": "ACALABRUTINIB", "label": "drug_likeness_score", "title": "drug_likeness_score", "to": "0.45", "width": 1}, {"arrows": "to", "from": "ACALABRUTINIB", "label": "approved_phase", "title": "approved_phase", "to": "4.0", "width": 1}, {"arrows": "to", "from": "ACALABRUTINIB", "label": "targets", "title": "targets", "to": "Tyrosine-protein kinase BTK", "width": 1}, {"arrows": "to", "from": "ACALABRUTINIB", "label": "in_organism", "title": "in_organism", "to": "Homo sapiens", "width": 1}, {"arrows": "to", "from": "ACALABRUTINIB", "label": "target_type", "title": "target_type", "to": "SINGLE PROTEIN", "width": 1}, {"arrows": "to", "from": "ACALABRUTINIB", "label": "mechanism_of_action", "title": "mechanism_of_action", "to": "Tyrosine-protein kinase BTK inhibitor", "width": 1}, {"arrows": "to", "from": "ACALABRUTINIB", "label": "treats", "title": "treats", "to": "chronic graft versus host disease", "width": 1}, {"arrows": "to", "from": "ACALABRUTINIB", "label": "associated_with_mesh", "title": "associated_with_mesh", "to": "Bronchiolitis Obliterans Syndrome", "width": 1}, {"arrows": "to", "from": "ACALABRUTINIB", "label": "has_toxicity", "title": "has_toxicity", "to": "activated_acetylene", "width": 1}, {"arrows": "to", "from": "ACALABRUTINIB", "label": "has_toxicity", "title": "has_toxicity", "to": "alkynyl michael acceptor1", "width": 1}, {"arrows": "to", "from": "ACALABRUTINIB", "label": "treats", "title": "treats", "to": "rheumatoid arthritis", "width": 1}, {"arrows": "to", "from": "ACALABRUTINIB", "label": "associated_with_mesh", "title": "associated_with_mesh", "to": "Arthritis, Rheumatoid", "width": 1}, {"arrows": "to", "from": "ACALABRUTINIB", "label": "treats", "title": "treats", "to": "non-small cell lung carcinoma", "width": 1}, {"arrows": "to", "from": "ACALABRUTINIB", "label": "associated_with_mesh", "title": "associated_with_mesh", "to": "Carcinoma, Non-Small-Cell Lung", "width": 1}, {"arrows": "to", "from": "ACALABRUTINIB", "label": "treats", "title": "treats", "to": "head and neck squamous cell carcinoma", "width": 1}, {"arrows": "to", "from": "ACALABRUTINIB", "label": "associated_with_mesh", "title": "associated_with_mesh", "to": "Carcinoma, Squamous Cell", "width": 1}, {"arrows": "to", "from": "ACALABRUTINIB", "label": "treats", "title": "treats", "to": "infectious disease", "width": 1}, {"arrows": "to", "from": "ACALABRUTINIB", "label": "associated_with_mesh", "title": "associated_with_mesh", "to": "Communicable Diseases", "width": 1}, {"arrows": "to", "from": "ACALABRUTINIB", "label": "treats", "title": "treats", "to": "food allergy", "width": 1}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {
+    "configure": {
+        "enabled": false
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": true,
+            "type": "dynamic"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "enabled": true,
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>

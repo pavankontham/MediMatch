@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prescription OCR - MediMatch</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#009688',
+                        'primary-dark': '#00796B',
+                        secondary: '#4CAF50',
+                        accent: '#E91E63',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .upload-zone {
+            border: 3px dashed #b2dfdb;
+            transition: all 0.3s ease;
+        }
+        .upload-zone.dragover {
+            border-color: #009688;
+            background-color: #e0f2f1;
+        }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #009688;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .glass-nav {
+            background: linear-gradient(135deg, rgba(0, 77, 64, 0.95), rgba(0, 121, 107, 0.95));
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-teal-50 to-green-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="glass-nav text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between flex-wrap">
+                <div class="flex items-center space-x-4">
+                    <a href="/" class="text-2xl font-bold flex items-center gap-2 text-white hover:text-teal-200">
+                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M19.5 12c0-.23-.01-.45-.03-.68l1.86-1.41c.4-.3.51-.86.26-1.3l-1.87-3.23a.987.987 0 00-1.25-.42l-2.15.91c-.37-.26-.76-.49-1.17-.68l-.29-2.31c-.06-.5-.49-.88-.99-.88h-3.73c-.51 0-.94.38-1 .88l-.29 2.31c-.41.19-.8.42-1.17.68l-2.15-.91c-.46-.2-1-.02-1.25.42L2.41 8.62c-.25.44-.14.99.26 1.3l1.86 1.41a7.343 7.343 0 000 1.35l-1.86 1.41c-.4.3-.51.86-.26 1.3l1.87 3.23c.25.44.79.62 1.25.42l2.15-.91c.37.26.76.49 1.17.68l.29 2.31c.06.5.49.88.99.88h3.73c.5 0 .93-.38.99-.88l.29-2.31c.41-.19.8-.42 1.17-.68l2.15.91c.46.2 1 .02 1.25-.42l1.87-3.23c.25-.44.14-.99-.26-1.3l-1.86-1.41c.03-.23.04-.45.04-.68zm-7.46 3.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
+                        MediMatch
+                    </a>
+                </div>
+                <div class="flex flex-wrap space-x-2 md:space-x-4 mt-2 md:mt-0">
+                    <a href="/" class="hover:text-teal-200 transition px-2 py-1">Drug Search</a>
+                    <a href="/visualize_kg" class="hover:text-teal-200 transition px-2 py-1">Knowledge Graph</a>
+                    <a href="/target-prediction" class="hover:text-teal-200 transition px-2 py-1">Target Prediction</a>
+                    <a href="/prescription-ocr" class="bg-teal-600 px-3 py-1 rounded-lg">Prescription OCR</a>
+                    <a href="/drug-copilot" class="hover:text-teal-200 transition px-2 py-1">AI Copilot</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">📄 Prescription OCR & Digitization</h2>
+            <p class="text-gray-600">
+                Upload a prescription image to extract drugs, dosages, and check for interactions. 
+                Our AI can read both <strong>printed and handwritten prescriptions</strong>.
+            </p>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Left: Upload Zone -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">📤 Upload Prescription</h3>
+                
+                <!-- Drag & Drop Zone -->
+                <div id="uploadZone" class="upload-zone rounded-lg p-8 text-center cursor-pointer mb-4">
+                    <input type="file" id="fileInput" accept="image/*" class="hidden">
+                    <svg class="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    <p class="text-lg font-semibold text-gray-700 mb-2">Drag & Drop Prescription Image</p>
+                    <p class="text-sm text-gray-500 mb-4">or click to browse</p>
+                    <button id="browseBtn" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition">
+                        Browse Files
+                    </button>
+                </div>
+
+                <!-- Image Preview -->
+                <div id="previewContainer" class="hidden mb-4">
+                    <p class="text-sm font-semibold text-gray-700 mb-2">Preview:</p>
+                    <img id="imagePreview" class="w-full rounded-lg shadow-md" alt="Preview">
+                    <p id="fileName" class="text-sm text-gray-600 mt-2"></p>
+                </div>
+
+                <!-- API Selection -->
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">🌐 Processing API:</label>
+                    <select id="apiSelection" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-teal-500 focus:border-transparent mb-2">
+                        <option value="hosted" selected>☁️ MediMatch Cloud API (Recommended)</option>
+                        <option value="local">🖥️ Local Gemini Vision API</option>
+                    </select>
+                    <p class="text-xs text-gray-500">
+                        <span id="apiDescription">Cloud API provides faster processing with optimized medical recognition</span>
+                    </p>
+                </div>
+
+                <!-- Upload Button -->
+                <button id="uploadBtn" disabled class="w-full bg-teal-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-teal-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed">
+                    🚀 Process Prescription
+                </button>
+
+                <!-- Progress -->
+                <div id="progress" class="hidden mt-4">
+                    <div class="flex items-center justify-center space-x-3">
+                        <div class="spinner"></div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-700">Processing...</p>
+                            <p class="text-xs text-gray-500" id="progressText">Extracting text from prescription</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Results -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">📋 Extracted Information</h3>
+                
+                <div id="resultsContainer" class="hidden">
+                    <!-- Overall Confidence -->
+                    <div class="mb-4 p-4 bg-teal-50 rounded-lg">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-semibold text-gray-700">Overall Confidence:</span>
+                            <span id="overallConfidence" class="text-lg font-bold text-teal-600">--</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                            <div id="confidenceBar" class="bg-teal-600 h-2 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- OCR Text -->
+                    <div class="mb-4">
+                        <h4 class="text-sm font-bold text-gray-700 mb-2">📝 Extracted Text:</h4>
+                        <div class="bg-gray-50 rounded-lg p-3 text-sm">
+                            <p id="extractedText" class="text-gray-800 whitespace-pre-wrap"></p>
+                        </div>
+                    </div>
+
+                    <!-- Prescription Items -->
+                    <div id="prescriptionItems" class="space-y-3">
+                        <!-- Will be populated dynamically -->
+                    </div>
+
+                    <!-- Drug Interactions -->
+                    <div id="interactions" class="hidden mt-4 p-4 bg-red-50 border-l-4 border-red-500 rounded">
+                        <h4 class="text-sm font-bold text-red-700 mb-2">⚠️ Drug Interactions Detected</h4>
+                        <div id="interactionsList"></div>
+                    </div>
+                </div>
+
+                <!-- No Results -->
+                <div id="noResults" class="text-center py-12">
+                    <svg class="mx-auto h-16 w-16 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <p class="text-gray-500">Upload a prescription to see results</p>
+                </div>
+
+                <!-- Error -->
+                <div id="error" class="hidden p-4 bg-red-50 border-l-4 border-red-500 rounded">
+                    <p class="text-sm font-semibold text-red-700 mb-1">Error</p>
+                    <p id="errorMessage" class="text-sm text-red-600"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+            <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                <div class="text-4xl mb-2">✍️</div>
+                <h4 class="font-bold text-gray-800 mb-2">Handwriting Recognition</h4>
+                <p class="text-sm text-gray-600">Advanced AI reads doctor's handwritten prescriptions accurately</p>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                <div class="text-4xl mb-2">💊</div>
+                <h4 class="font-bold text-gray-800 mb-2">Smart Extraction</h4>
+                <p class="text-sm text-gray-600">Automatically extracts drugs, dosages, frequencies, and instructions</p>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                <div class="text-4xl mb-2">⚠️</div>
+                <h4 class="font-bold text-gray-800 mb-2">Interaction Alerts</h4>
+                <p class="text-sm text-gray-600">Checks for dangerous drug-drug interactions</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const browseBtn = document.getElementById('browseBtn');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const previewContainer = document.getElementById('previewContainer');
+        const imagePreview = document.getElementById('imagePreview');
+        const fileName = document.getElementById('fileName');
+        const progress = document.getElementById('progress');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const noResults = document.getElementById('noResults');
+        const errorDiv = document.getElementById('error');
+
+        let selectedFile = null;
+
+        // API Selection handler
+        const apiSelection = document.getElementById('apiSelection');
+        const apiDescription = document.getElementById('apiDescription');
+
+        apiSelection.addEventListener('change', () => {
+            if (apiSelection.value === 'local') {
+                apiDescription.textContent = 'Local processing uses Gemini Vision with your configured API key';
+            } else {
+                apiDescription.textContent = 'Cloud API provides faster processing with optimized medical recognition';
+            }
+        });
+
+        // Drag and drop
+        uploadZone.addEventListener('click', () => fileInput.click());
+        browseBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            fileInput.click();
+        });
+
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            selectedFile = file;
+            
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imagePreview.src = e.target.result;
+                previewContainer.classList.remove('hidden');
+                fileName.textContent = file.name;
+                uploadBtn.disabled = false;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Upload and process
+        uploadBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+
+            const formData = new FormData();
+            formData.append('prescription_image', selectedFile);
+            formData.append('api_mode', apiSelection.value);
+
+            // Update progress text based on API selection
+            const progressText = document.getElementById('progressText');
+            progressText.textContent = apiSelection.value === 'hosted'
+                ? 'Processing with MediMatch Cloud API...'
+                : 'Processing with local Gemini Vision...';
+
+            // Show progress
+            progress.classList.remove('hidden');
+            resultsContainer.classList.add('hidden');
+            noResults.classList.add('hidden');
+            errorDiv.classList.add('hidden');
+            uploadBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/prescription/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.error) {
+                    showError(result.error);
+                    return;
+                }
+
+                // Display results with source info
+                displayResults(result);
+
+                // Show which API was used
+                const sourceInfo = document.createElement('div');
+                sourceInfo.className = 'mt-2 text-sm text-gray-500';
+                sourceInfo.innerHTML = `<i>Processed via: ${result.source === 'hosted_api' ? '☁️ MediMatch Cloud API' : '🖥️ Local Gemini Vision'}</i>`;
+                resultsContainer.prepend(sourceInfo);
+
+            } catch (error) {
+                showError('Failed to process prescription: ' + error.message);
+            } finally {
+                progress.classList.add('hidden');
+                uploadBtn.disabled = false;
+            }
+        });
+
+        function displayResults(result) {
+            resultsContainer.classList.remove('hidden');
+            noResults.classList.add('hidden');
+
+            // Overall confidence
+            const confidence = (result.overall_confidence * 100).toFixed(0);
+            document.getElementById('overallConfidence').textContent = confidence + '%';
+            document.getElementById('confidenceBar').style.width = confidence + '%';
+
+            // Extracted text
+            const correctedText = result.stages?.correction?.corrected_text || result.stages?.ocr?.raw_text || 'No text extracted';
+            document.getElementById('extractedText').textContent = correctedText;
+
+            // Prescription items
+            const itemsContainer = document.getElementById('prescriptionItems');
+            itemsContainer.innerHTML = '';
+
+            if (result.prescription_items && result.prescription_items.length > 0) {
+                result.prescription_items.forEach((item, index) => {
+                    // Handle instructions - can be string or array
+                    let instructionsHtml = '';
+                    if (item.instructions) {
+                        if (Array.isArray(item.instructions)) {
+                            instructionsHtml = item.instructions.join(', ');
+                        } else if (typeof item.instructions === 'string') {
+                            instructionsHtml = item.instructions;
+                        }
+                    }
+
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'p-4 bg-green-50 border-l-4 border-green-500 rounded';
+                    itemDiv.innerHTML = `
+                        <h5 class="font-bold text-gray-800 mb-2">💊 Medicine ${index + 1}: ${item.drug_name || 'Unknown'}</h5>
+                        <div class="text-sm text-gray-700 space-y-1">
+                            ${item.dosage ? `<p><strong>Dosage:</strong> ${item.dosage}</p>` : ''}
+                            ${item.frequency ? `<p><strong>Frequency:</strong> ${item.frequency}</p>` : ''}
+                            ${item.duration ? `<p><strong>Duration:</strong> ${item.duration}</p>` : ''}
+                            ${item.route ? `<p><strong>Route:</strong> ${item.route}</p>` : ''}
+                            ${instructionsHtml ? `<p><strong>Instructions:</strong> ${instructionsHtml}</p>` : ''}
+                        </div>
+                    `;
+                    itemsContainer.appendChild(itemDiv);
+                });
+
+                // Check for interactions
+                checkInteractions(result.prescription_items.map(item => item.drug_name));
+            } else {
+                itemsContainer.innerHTML = '<p class="text-gray-500 text-sm">No prescription items extracted. The OCR might need better quality image.</p>';
+            }
+        }
+
+        async function checkInteractions(drugs) {
+            if (drugs.length < 2) return;
+
+            try {
+                const response = await fetch('/api/prescription/check-interactions', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ drugs })
+                });
+
+                const result = await response.json();
+
+                if (result.interactions && result.interactions.length > 0) {
+                    const interactionsDiv = document.getElementById('interactions');
+                    const interactionsList = document.getElementById('interactionsList');
+                    
+                    interactionsList.innerHTML = result.interactions.map(interaction => `
+                        <div class="text-sm text-red-700 mb-2">
+                            <strong>${interaction.drug1} + ${interaction.drug2}:</strong> ${interaction.description}
+                        </div>
+                    `).join('');
+                    
+                    interactionsDiv.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Failed to check interactions:', error);
+            }
+        }
+
+        function showError(message) {
+            errorDiv.classList.remove('hidden');
+            document.getElementById('errorMessage').textContent = message;
+            resultsContainer.classList.add('hidden');
+            noResults.classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
