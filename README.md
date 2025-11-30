@@ -416,11 +416,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 👥 Authors
-
-- **Your Name** - *Initial work* - [YourGitHub](https://github.com/yourusername)
-
----
 
 ## 🙏 Acknowledgments
 
@@ -435,11 +430,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📧 Contact
 
-For questions, issues, or collaboration:
+For questions:
 
-- **Email**: your.email@example.com
-- **GitHub Issues**: https://github.com/yourusername/medimatch/issues
-- **Twitter**: @yourhandle
+- **Email**: pavankontham007@gmail.com
 
 ---
 
